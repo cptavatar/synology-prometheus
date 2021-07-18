@@ -14,11 +14,11 @@ chown -R 472:472 ${PROMETHEUS_ROOT}/data/grafana #grafana userid
 
 configs=( "grafana.ini" "prometheus.yml" )
 for i in "${configs[@]}"; do
-  curl -fsSL https://raw.githubusercontent.com/prahaladramji/synology-prometheus/master/configs/${i} -o ${PROMETHEUS_ROOT}/configs/${i}
+  curl -fsSL https://raw.githubusercontent.com/cptavatar/synology-prometheus/master/configs/${i} -o ${PROMETHEUS_ROOT}/configs/${i}
   echo "config created ${PROMETHEUS_ROOT}/configs/${i}"
 done
 
-curl -fsSL https://raw.githubusercontent.com/prahaladramji/synology-prometheus/master/docker-compose.yml \
+curl -fsSL https://raw.githubusercontent.com/cptavatar/synology-prometheus/master/docker-compose.yml \
 | sed "s/\${PROMETHEUS_ROOT}/${PROMETHEUS_ROOT//\//\\/}/g" > ${PROMETHEUS_ROOT}/docker-compose.yml
 echo "docker-compose file created ${PROMETHEUS_ROOT}/docker-compose.yml"
 
