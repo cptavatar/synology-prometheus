@@ -1,0 +1,4 @@
+- name: install and run prometheus on synology
+  hosts: synology
+  roles:
+    - prometheus

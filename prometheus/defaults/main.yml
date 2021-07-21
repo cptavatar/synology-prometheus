@@ -1,0 +1,5 @@
+PROMETHEUS_ROOT: "/volume1/docker/prometheus"
+UNIFI_PASSWD: "myunifypassword"
+UNIFI_USER: "myunifiusername"
+UNIFI_URL: "https://my.unifi.ip"
+

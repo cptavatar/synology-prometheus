@@ -1,0 +1,29 @@
+#!/bin/sh
+set -e
+
+COMPOSE_FILE="{{ PROMETHEUS_ROOT }}/docker-compose.yml"
+
+function start_containers {
+  docker-compose -f $COMPOSE_FILE up -d
+}
+
+function stop_containers {
+  docker-compose -f $COMPOSE_FILE stop
+}
+
+case $1 in
+start)
+  stop_containers
+  start_containers
+
+  # apparently grafana is picky about execute bit
+  chmod go-x -R /volume1/docker/prometheus/data/grafana/plugins/*
+  ;;
+stop)
+  stop_containers
+  ;;
+*)
+  echo "Usage: [start | stop]"
+  ;;
+esac
+

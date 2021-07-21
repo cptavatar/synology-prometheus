@@ -1,0 +1,34 @@
+- name: Ensure directories exist
+  file:
+    path: "{{ PROMETHEUS_ROOT }}/{{ item.path }}"
+    state: directory
+    owner: "{{ item.id }}"
+    group: "{{ item.id }}"
+  with_items:
+    - { path: "configs", id: 0 }
+    - { path: "data", id: 0 }
+    - { path: "data/grafana", id: 472 }
+    - { path: "data/prometheus", id: 65534 }
+    - { path: "data/alertmanager", id: 0 }
+
+- name: copy configuration files
+  copy:
+    src: "{{ item }}"
+    dest: "{{ PROMETHEUS_ROOT }}"
+  with_items:
+    - configs
+
+- name: copy run script
+  template:
+    src: run-prometheus.sh.j2
+    dest: /usr/local/bin/run-prometheus.sh
+    mode: 500
+
+- name: create docker-compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ PROMETHEUS_ROOT }}/docker-compose.yml"
+
+
+
+

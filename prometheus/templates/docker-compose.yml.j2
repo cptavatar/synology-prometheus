@@ -1,0 +1,76 @@
+version: '3.3'
+
+services:
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    restart: always
+    environment:
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,natel-discrete-panel,grafana-piechart-panel
+      - GF_ALLOW_LOADING_UNSIGNED_PLUGINS=natel-discrete-panel
+    links:
+      - prometheus
+    ports:
+      - "3000:3000"
+    volumes:
+      - {{ PROMETHEUS_ROOT }}/configs/grafana.ini:/etc/grafana/grafana.ini
+      - {{ PROMETHEUS_ROOT }}/data/grafana:/var/lib/grafana
+
+  prometheus:
+    image: prom/prometheus
+    container_name: prometheus
+    restart: always
+    links:
+      - alertmanager
+      - node-exporter
+    ports:
+      - "9090:9090"
+    volumes:
+      - {{ PROMETHEUS_ROOT }}/configs/prometheus.yml:/etc/prometheus/prometheus.yml
+      - {{ PROMETHEUS_ROOT }}/data/prometheus:/prometheus
+
+  alertmanager:
+    image: prom/alertmanager
+    container_name: alertmanager
+    restart: always
+    ports:
+      - "9093:9093"
+    volumes:
+      - {{ PROMETHEUS_ROOT }}/data/alertmanager:/alertmanager
+
+  node-exporter:
+    privileged: true
+    image: prom/node-exporter
+    container_name: node-exporter
+    restart: always
+    ports:
+      - "9100:9100"
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - "--path.procfs=/host/proc"
+      - "--path.sysfs=/host/sys"
+      - "--collector.filesystem.ignored-mount-points"
+      - "^/(rootfs/)?(dev|etc|host|proc|run|sys|volume1)($$|/)"
+
+  unpoller:
+    image: golift/unifi-poller:latest
+    restart: unless-stopped
+    ports:
+      - '9130:9130'
+    container_name: unpoller
+    environment:
+      - UP_INFLUXDB_DISABLE=true
+      - UP_PROMETHEUS_HTTP_LISTEN=0.0.0.0:9130
+      - UP_PROMETHEUS_NAMESPACE=unifipoller
+      - UP_UNIFI_DEFAULT_URL={{ UNIFI_URL }}
+      - UP_UNIFI_DEFAULT_USER={{ UNIFI_USER }}
+      - UP_UNIFI_DEFAULT_PASS={{ UNIFI_PASSWD }}
+      - UP_UNIFI_CONTROLLER_0_SAVE_ALARMS=true
+      - UP_UNIFI_CONTROLLER_0_SAVE_ANOMALIES=true
+      - UP_UNIFI_CONTROLLER_0_SAVE_DPI=true
+      - UP_UNIFI_CONTROLLER_0_SAVE_EVENTS=true
+      - UP_UNIFI_CONTROLLER_0_SAVE_IDS=true
+      - UP_UNIFI_CONTROLLER_0_SAVE_SITES=true
